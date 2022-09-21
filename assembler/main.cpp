@@ -235,9 +235,11 @@ void printFile(){
     for(int i = 0; i < numberOfSymbols; i++){ //1st pass through symbols list to see if there are any labels, to record their addresses.
         firstPass(numberOfSymbols, symbolCounter, lineCounter, labelsCounter);
     }
+    cout << "SYMBOL TABLE" << endl;
+    cout << "name of the label" << "        " << "address" << endl;
 
-    for(int i=0; i<label.size(); i++){
-        cout << "name of the label " << label[i].name << " : address " << label[i].address +1<< endl;
+    for(int i=0; i<label.size()-1; i++){
+        cout << label[i].name << "                     " << label[i].address +1<< endl;
     }
 }
 
@@ -253,6 +255,6 @@ int main(int argc, char *argv[]){
     // printSymbols();
     // cout << "Symbols Printed..." << endl;
     printFile();
-    cout << "Assembled file created..." << endl;
+    //cout << "Assembled file created..." << endl;
     return 0;
 }
