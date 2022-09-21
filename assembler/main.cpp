@@ -56,8 +56,7 @@ string dec2bin(int value)
     return b.to_string();
 }
 
-void openFile(char *filename)
-{
+void openFile(char *filename){
     ifstream file;
     file.open(filename);
 
@@ -90,60 +89,88 @@ void openFile(char *filename)
     }
 }
 
-/* This is the main print function that utilizes all the functions above it to print out the assembled instructions */
-void printFile() //This function prints to file.
-{
+/* Checks for identifiers (lowercase symbols, ex: addi, lw, etc.) */
+void identifiers(char &value, int &i){
+    string temp;
 
-    ofstream oFile;
-    oFile.open("f.txt");
-
-    //First we want to print out the header of the file.
-    oFile << "WIDTH=32;" << endl;
-    oFile << "DEPTH=256;" << endl;
-    oFile << endl;
-    oFile << "ADDRESS_RADIX=HEX;" << endl;
-    oFile << "DATA_RADIX=HEX;" << endl;
-    oFile << endl;
-    oFile << "CONTENT BEGIN" << endl;
-
-    int lineCounter = 0; //The line counter records the line address count.
-    int numberOfSymbols = symbols.size(); //This is the number of symbols we parsed from the assembly file.
-    int symbolCounter = 0; //Whenever we iterate through the symbols vector we want to keep count as to not overflow.
-    string instruction; //This string holds the final instruction in HEX for printing.
-    int labelsCounter = 0; //We keep a count of the labels we find in the symbols vector.
-
-    for(int i = 0; i < numberOfSymbols; i++) //1st pass through symbols list to see if there are any labels, to record their addresses.
-    {
-        firstPass(numberOfSymbols, symbolCounter, lineCounter, labelsCounter);
+    while(islower(value)){
+        if(i == tokenSize){
+            break;
+        }
+        temp += value;
+        i++;
+        value = tokens[i];
     }
 
-    symbolCounter = 0; //Reset symbolCounter and lineCounter to be used in the second pass.
-    lineCounter = 0;
+    symbols.push_back(temp);
+}
 
-    for(int i = 0; i < 255; i++) //2nd pass goes through the symbol list and starts concatenating the correct string/instruction.
-    {
+/* Checks for registers, knows if a register is being parsed a '$' symbol is encountered then records the number */
+void registers(char &value, int &i){
+    string temp;
+    temp += value;
+    i++;
+    value = tokens[i];
 
-        if((symbolCounter == numberOfSymbols) && (lineCounter != 255))
-        {
-            oFile << "   [";
-            oFile << setw(3) << setfill('0') << hex << lineCounter;
-            oFile << "..";
-            oFile << setw(3) << setfill('0') << hex << 255;
-            oFile << "]" << "  :   00000000;" << endl;
+    while(isdigit(value)){
+        if(i == tokenSize){
+            break;
+        }
+        temp += value;
+        i++;
+        value = tokens[i];
+    }
+    symbols.push_back(temp);
+}
+
+/* Checks for digits, digits are usually addressees or offsets, it disguishes between the two and records appropriate symbols */
+void digits(char &value, int &i){
+    string temp;
+    if(value == '0' && tokens[i+1] == 'x'){
+        i = i + 2;
+    }
+    if(value == '-'){
+        temp = value;
+        i = i + 1;
+    }
+    value = tokens[i];
+    while(isdigit(value) || islower(value)){
+        if(i == tokenSize){
             break;
         }
 
-        oFile << "   ";
-        oFile << setw(3) << setfill('0') << hex << lineCounter << "  :   ";
-        instruction = symbolPrint(i,numberOfSymbols, symbolCounter, labelsCounter, lineCounter);
-        oFile << instruction << ";" << endl;
-
+        temp += value;
+        i++;
+        value = tokens[i];
     }
-    oFile << endl;
-    oFile << "END;";
-    oFile.close();
-
+    symbols.push_back(temp);
 }
+
+
+/* This function generates the symbol vector using the functions above it to distinguish between symbols */
+void compareTokens() {//This function turns all tokens into symbols.
+    for(int i = 0; i < tokenSize; i++){
+            token = tokens[i];
+
+            if(islower(token)){
+                identifiers(token, i);
+            }
+            if(token == '$'){
+                registers(token, i);
+            }
+            if(isdigit(token) || token == '-'){
+                digits(token, i);
+            }
+    }
+}
+
+/* This is a function used for tests only use if you need to see the way the symbols were parsed */
+void printSymbols(){
+    for(int i = 0; i < symbols.size(); i++){
+        cout << symbols[i] << endl;
+    }
+}
+
 
 int main(int argc, char *argv[])
 {
@@ -153,5 +180,11 @@ int main(int argc, char *argv[])
     }
     openFile(argv[1]);
     cout << "file open and parsed..." << endl;
-    return 0;
+    compareTokens();
+    cout << "Tokens Compared..." << endl;
+    printSymbols();
+    cout << "Symbols Printed..." << endl;
+    // printFile();
+    // cout << "Assembled file created..." << endl;
+    // return 0;
 }
