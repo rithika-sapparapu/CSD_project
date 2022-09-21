@@ -14,48 +14,7 @@ char token; //token holder.
 vector<char> tokens; //Vector of tokens taken from the original file.
 vector<string> symbols; //Vectr of symbols.
 
-
-/* Converts hex values to binary values (strings only) */
-string hex2bin(string hexString)
-{
-    stringstream temp;
-    temp << hex << hexString;
-    unsigned n;
-    temp >> n;
-    bitset<16> b(n);
-
-    return b.to_string();
-}
-
-/* Converts  binary values to hex values (strings only) */
-string bin2hex(string binString)
-{
-    string hexString;
-    bitset<32> b(binString);
-    unsigned n = b.to_ulong();
-    stringstream temp;
-    temp << hex << setfill('0') << setw(8) << n;
-    hexString = temp.str();
-    transform(hexString.begin(), hexString.end(), hexString.begin(), ::toupper);
-    return hexString;
-
-}
-
-/* Converts decimal values to hex values (Outputs a string) */
-string dec2bin(int value)
-{
-    stringstream ht;
-    ht << hex << value;
-
-    stringstream bt;
-    bt << hex << ht.str();
-    unsigned n;
-    bt >> n;
-    bitset<16> b(n);
-
-    return b.to_string();
-}
-
+//-------------------------------------------------------------------------------------------------------------------
 void openFile(char *filename){
     ifstream file;
     file.open(filename);
@@ -170,10 +129,157 @@ void printSymbols(){
         cout << symbols[i] << endl;
     }
 }
+//-------------------------------------------------------------------------------------------------------------------
 
-
-int main(int argc, char *argv[])
+/* The firstPass function runs through the symbol list and records all labels and their addresses */
+void firstPass(int &numberOfSymbols, int &symbolsCounter, int &lineCounter, int &labelsCounter) //This function looks through all symbols to find labels.
 {
+    if(numberOfSymbols == symbolsCounter)
+    {
+        return;
+    }
+    string temp_symbol = symbols[symbolsCounter];
+
+    if(temp_symbol == "add")    symbolsCounter = symbolsCounter + 4;
+    else if(temp_symbol == "addi") symbolsCounter = symbolsCounter + 4;
+    else if(temp_symbol == "addiu") symbolsCounter = symbolsCounter + 4;
+    else if(temp_symbol == "addu") symbolsCounter = symbolsCounter + 4;
+    else if(temp_symbol == "and") symbolsCounter = symbolsCounter + 4;
+    else if(temp_symbol == "andi") symbolsCounter = symbolsCounter + 4;
+    else if(temp_symbol == "beq") symbolsCounter = symbolsCounter + 4;
+    else if(temp_symbol == "bne") symbolsCounter = symbolsCounter + 4;
+    else if(temp_symbol == "j") symbolsCounter = symbolsCounter + 2;
+    else if(temp_symbol == "jal") symbolsCounter = symbolsCounter + 2;
+    else if(temp_symbol == "jr") symbolsCounter = symbolsCounter + 2;
+    else if(temp_symbol == "lbu") symbolsCounter = symbolsCounter + 4;
+    else if(temp_symbol == "lhu") symbolsCounter = symbolsCounter + 4;
+    else if(temp_symbol == "lui") symbolsCounter = symbolsCounter + 3;
+    else if(temp_symbol == "lw") symbolsCounter = symbolsCounter + 4;
+    else if(temp_symbol == "nor") symbolsCounter = symbolsCounter + 4;
+    else if(temp_symbol == "or") symbolsCounter = symbolsCounter + 4;
+    else if(temp_symbol == "ori") symbolsCounter = symbolsCounter + 4;
+    else if(temp_symbol == "slt") symbolsCounter = symbolsCounter + 4;
+    else if(temp_symbol == "slti") symbolsCounter = symbolsCounter + 4;
+    else if(temp_symbol == "sltiu") symbolsCounter = symbolsCounter + 4;
+    else if(temp_symbol == "sltu") symbolsCounter = symbolsCounter + 4;
+    else if(temp_symbol == "sll") symbolsCounter = symbolsCounter + 4;
+    else if(temp_symbol == "srl") symbolsCounter = symbolsCounter + 4;
+    else if(temp_symbol == "sb") symbolsCounter = symbolsCounter + 4;
+    else if(temp_symbol == "sh") symbolsCounter = symbolsCounter + 4;
+    else if(temp_symbol == "sw") symbolsCounter = symbolsCounter + 4;
+    else if(temp_symbol == "sub") symbolsCounter = symbolsCounter + 4;
+    else if(temp_symbol == "subu") symbolsCounter = symbolsCounter + 4;
+    else
+    {
+            //If a label is found that isn't an instruction is probably is a label and is recorded.
+            Labels newLabel; //We create a new Labels object.
+            newLabel.name = temp_symbol; //We store the name of the label.
+            newLabel.address = lineCounter; //We store the lineCounter (address in decimal).
+            label.push_back(newLabel); //Then we push the object into a vector for storage.
+            //We do not increment lineCounter because a label is just a placeholder for the next instruction's address not it's own.
+            labelsCounter++; //We increment the labels counter keeping track of the size of our vector.
+            symbolsCounter++; //We increment symbolsCounter because the label is a symbol in our symbols vector.
+            return;
+    }
+
+    lineCounter++; //We increment the line counter once after each instruction is run through. Except for when a label is found!
+}
+
+/* Converts hex values to binary values (strings only) */
+string hex2bin(string hexString)
+{
+    stringstream temp;
+    temp << hex << hexString;
+    unsigned n;
+    temp >> n;
+    bitset<16> b(n);
+
+    return b.to_string();
+}
+
+/* Converts  binary values to hex values (strings only) */
+string bin2hex(string binString)
+{
+    string hexString;
+    bitset<32> b(binString);
+    unsigned n = b.to_ulong();
+    stringstream temp;
+    temp << hex << setfill('0') << setw(8) << n;
+    hexString = temp.str();
+    transform(hexString.begin(), hexString.end(), hexString.begin(), ::toupper);
+    return hexString;
+
+}
+
+/* Converts decimal values to hex values (Outputs a string) */
+string dec2bin(int value)
+{
+    stringstream ht;
+    ht << hex << value;
+
+    stringstream bt;
+    bt << hex << ht.str();
+    unsigned n;
+    bt >> n;
+    bitset<16> b(n);
+
+    return b.to_string();
+}
+
+
+/* This is the main print function that utilizes all the functions above it to print out the assembled instructions */
+void printFile() //This function prints to file.
+{
+
+    ofstream oFile;
+    oFile.open("f.txt");
+
+    //First we want to print out the header of the file.
+    oFile << "WIDTH=32;" << endl;
+    oFile << "DEPTH=256;" << endl;
+    oFile << endl;
+    oFile << "ADDRESS_RADIX=HEX;" << endl;
+    oFile << "DATA_RADIX=HEX;" << endl;
+    oFile << endl;
+    oFile << "CONTENT BEGIN" << endl;
+
+    int lineCounter = 0; //The line counter records the line address count.
+    int numberOfSymbols = symbols.size(); //This is the number of symbols we parsed from the assembly file.
+    int symbolCounter = 0; //Whenever we iterate through the symbols vector we want to keep count as to not overflow.
+    string instruction; //This string holds the final instruction in HEX for printing.
+    int labelsCounter = 0; //We keep a count of the labels we find in the symbols vector.
+
+    for(int i = 0; i < numberOfSymbols; i++){ //1st pass through symbols list to see if there are any labels, to record their addresses.
+        firstPass(numberOfSymbols, symbolCounter, lineCounter, labelsCounter);
+    }
+
+    symbolCounter = 0; //Reset symbolCounter and lineCounter to be used in the second pass.
+    lineCounter = 0;
+
+    for(int i = 0; i < 255; i++) {//2nd pass goes through the symbol list and starts concatenating the correct string/instruction.
+        if((symbolCounter == numberOfSymbols) && (lineCounter != 255))
+        {
+            oFile << "   [";
+            oFile << setw(3) << setfill('0') << hex << lineCounter;
+            oFile << "..";
+            oFile << setw(3) << setfill('0') << hex << 255;
+            oFile << "]" << "  :   00000000;" << endl;
+            break;
+        }
+
+        oFile << "   ";
+        oFile << setw(3) << setfill('0') << hex << lineCounter << "  :   ";
+        instruction = symbolPrint(i,numberOfSymbols, symbolCounter, labelsCounter, lineCounter);
+        oFile << instruction << ";" << endl;
+
+    }
+    oFile << endl;
+    oFile << "END;";
+    oFile.close();
+
+}
+
+int main(int argc, char *argv[]){
     if(argc < 2) {
         cout << "Usage: " << argv[0] << " <filename>" << endl;
         return 1;
@@ -184,7 +290,7 @@ int main(int argc, char *argv[])
     cout << "Tokens Compared..." << endl;
     printSymbols();
     cout << "Symbols Printed..." << endl;
-    // printFile();
-    // cout << "Assembled file created..." << endl;
-    // return 0;
+    printFile();
+    cout << "Assembled file created..." << endl;
+    return 0;
 }
