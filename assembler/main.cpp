@@ -132,10 +132,8 @@ void printSymbols(){
 //-------------------------------------------------------------------------------------------------------------------
 
 /* The firstPass function runs through the symbol list and records all labels and their addresses */
-void firstPass(int &numberOfSymbols, int &symbolsCounter, int &lineCounter, int &labelsCounter) //This function looks through all symbols to find labels.
-{
-    if(numberOfSymbols == symbolsCounter)
-    {
+void firstPass(int &numberOfSymbols, int &symbolsCounter, int &lineCounter, int &labelsCounter) {//This function looks through all symbols to find labels.
+    if(numberOfSymbols == symbolsCounter){
         return;
     }
     string temp_symbol = symbols[symbolsCounter];
@@ -169,8 +167,7 @@ void firstPass(int &numberOfSymbols, int &symbolsCounter, int &lineCounter, int 
     else if(temp_symbol == "sw") symbolsCounter = symbolsCounter + 4;
     else if(temp_symbol == "sub") symbolsCounter = symbolsCounter + 4;
     else if(temp_symbol == "subu") symbolsCounter = symbolsCounter + 4;
-    else
-    {
+    else{
             //If a label is found that isn't an instruction is probably is a label and is recorded.
             Labels newLabel; //We create a new Labels object.
             newLabel.name = temp_symbol; //We store the name of the label.
@@ -179,9 +176,9 @@ void firstPass(int &numberOfSymbols, int &symbolsCounter, int &lineCounter, int 
             //We do not increment lineCounter because a label is just a placeholder for the next instruction's address not it's own.
             labelsCounter++; //We increment the labels counter keeping track of the size of our vector.
             symbolsCounter++; //We increment symbolsCounter because the label is a symbol in our symbols vector.
+            lineCounter++;
             return;
     }
-
     lineCounter++; //We increment the line counter once after each instruction is run through. Except for when a label is found!
 }
 
@@ -228,21 +225,7 @@ string dec2bin(int value)
 
 
 /* This is the main print function that utilizes all the functions above it to print out the assembled instructions */
-void printFile() //This function prints to file.
-{
-
-    ofstream oFile;
-    oFile.open("f.txt");
-
-    //First we want to print out the header of the file.
-    oFile << "WIDTH=32;" << endl;
-    oFile << "DEPTH=256;" << endl;
-    oFile << endl;
-    oFile << "ADDRESS_RADIX=HEX;" << endl;
-    oFile << "DATA_RADIX=HEX;" << endl;
-    oFile << endl;
-    oFile << "CONTENT BEGIN" << endl;
-
+void printFile(){
     int lineCounter = 0; //The line counter records the line address count.
     int numberOfSymbols = symbols.size(); //This is the number of symbols we parsed from the assembly file.
     int symbolCounter = 0; //Whenever we iterate through the symbols vector we want to keep count as to not overflow.
@@ -253,30 +236,9 @@ void printFile() //This function prints to file.
         firstPass(numberOfSymbols, symbolCounter, lineCounter, labelsCounter);
     }
 
-    symbolCounter = 0; //Reset symbolCounter and lineCounter to be used in the second pass.
-    lineCounter = 0;
-
-    for(int i = 0; i < 255; i++) {//2nd pass goes through the symbol list and starts concatenating the correct string/instruction.
-        if((symbolCounter == numberOfSymbols) && (lineCounter != 255))
-        {
-            oFile << "   [";
-            oFile << setw(3) << setfill('0') << hex << lineCounter;
-            oFile << "..";
-            oFile << setw(3) << setfill('0') << hex << 255;
-            oFile << "]" << "  :   00000000;" << endl;
-            break;
-        }
-
-        oFile << "   ";
-        oFile << setw(3) << setfill('0') << hex << lineCounter << "  :   ";
-        instruction = symbolPrint(i,numberOfSymbols, symbolCounter, labelsCounter, lineCounter);
-        oFile << instruction << ";" << endl;
-
+    for(int i=0; i<label.size(); i++){
+        cout << "name of the label " << label[i].name << " : address " << label[i].address +1<< endl;
     }
-    oFile << endl;
-    oFile << "END;";
-    oFile.close();
-
 }
 
 int main(int argc, char *argv[]){
@@ -288,8 +250,8 @@ int main(int argc, char *argv[]){
     cout << "file open and parsed..." << endl;
     compareTokens();
     cout << "Tokens Compared..." << endl;
-    printSymbols();
-    cout << "Symbols Printed..." << endl;
+    // printSymbols();
+    // cout << "Symbols Printed..." << endl;
     printFile();
     cout << "Assembled file created..." << endl;
     return 0;
