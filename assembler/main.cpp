@@ -36,7 +36,7 @@ void openFile(char *filename){
         }
         i = 0;
         tokenSize--;
-
+/*
         for(int i = 0; i < tokenSize; i++){
             // if(tokens[i] == '\n'){
             //     cout << "new line" << endl;
@@ -45,6 +45,7 @@ void openFile(char *filename){
         }
         cout << endl;
         cout << "value of variable tokenSize" << tokenSize << endl;
+*/
     }
 }
 
@@ -235,11 +236,11 @@ void printFile(){
     for(int i = 0; i < numberOfSymbols; i++){ //1st pass through symbols list to see if there are any labels, to record their addresses.
         firstPass(numberOfSymbols, symbolCounter, lineCounter, labelsCounter);
     }
-    cout << "SYMBOL TABLE" << endl;
-    cout << "name of the label" << "        " << "address" << endl;
+    cout << setw(23) <<  "SYMBOL TABLE" << endl;
+    cout << setw(15) << "LABEL" << setw(10) << "ADDRESS" << endl;
 
     for(int i=0; i<label.size()-1; i++){
-        cout << label[i].name << "                     " << label[i].address +1<< endl;
+        cout << setw(15) << label[i].name << setw(10) << label[i].address +1<< endl;
     }
 }
 

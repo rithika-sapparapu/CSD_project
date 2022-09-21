@@ -1,12 +1,7 @@
 lui $1, 0xffff
-lui $2, 0x8000
-lui $3, 0x7fff
-lui $4, 0x5a4b
 lui $5, 0x1e0f
 addi $6, $0, 0x0001
 ori $1, $1, 0xfffe
-ori $3, $3, 0xffff
-ori $4, $4, 0x3c2d
 ori $5, $5, 0xf0e1
 sub $7, $0, $6
 add $1, $1, $6
@@ -15,15 +10,10 @@ toggle:
 nor $9, $4, $5
 beq $4, $5, end
 srl $10, $2, 1
-srl $11, $2, 16
-sll $12, $8, 4
 sll $13, $8, 20
 subu $8, $8, $10
 dest:
 sltiu $24, $11, 0x7fff
-slt $9, $10, $12
-sltu $16, $10, $12
-slt $11, $13, $0
 sltu $17, $13, $0
 slti $14, $0, 0x0001
 slti $15, $13, 0x7fff
@@ -41,7 +31,6 @@ j end
 part:
 lw $18, -1($8)
 lw $19, 3($8)
-addu $9, $8, $1
 addu $11, $8, $11
 addiu $30, $31, 0x0024
 lhu $20, -1($8)
