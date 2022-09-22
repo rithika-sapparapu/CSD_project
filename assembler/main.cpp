@@ -1,13 +1,13 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-//This struct is helpful for tying labels to their address for branch and jump instructions
-struct Labels{
+//This struct is helpful for tying tags to their address for branch and jump instructions
+struct tags{
   string name;
   int address;
 };
 
-vector<Labels> label;
+vector<tags> tag;
 
 int tokenSize = 0; //The size of the tokenized original assembly file.
 char token; //token holder.
@@ -20,7 +20,7 @@ void openFile(char *filename){
     file.open(filename);
 
     if(!file.is_open()){ //If the file does not exist the program crashes.
-        cout << "FILE DOES NOT EXIST/FAILED TO OPEN FILE!" << endl;
+        cout << "Failed to open the file." << endl;
         exit(EXIT_FAILURE);
     }
 
@@ -49,7 +49,6 @@ void openFile(char *filename){
     }
 }
 
-/* Checks for identifiers (lowercase symbols, ex: addi, lw, etc.) */
 void identifiers(char &value, int &i){
     string temp;
 
@@ -65,7 +64,6 @@ void identifiers(char &value, int &i){
     symbols.push_back(temp);
 }
 
-/* Checks for registers, knows if a register is being parsed a '$' symbol is encountered then records the number */
 void registers(char &value, int &i){
     string temp;
     temp += value;
@@ -83,7 +81,6 @@ void registers(char &value, int &i){
     symbols.push_back(temp);
 }
 
-/* Checks for digits, digits are usually addressees or offsets, it disguishes between the two and records appropriate symbols */
 void digits(char &value, int &i){
     string temp;
     if(value == '0' && tokens[i+1] == 'x'){
@@ -132,8 +129,8 @@ void printSymbols(){
 }
 //-------------------------------------------------------------------------------------------------------------------
 
-/* The firstPass function runs through the symbol list and records all labels and their addresses */
-void firstPass(int &numberOfSymbols, int &symbolsCounter, int &lineCounter, int &labelsCounter) {//This function looks through all symbols to find labels.
+/* The firstPass function runs through the symbol list and records all tags and their addresses */
+void firstPass(int &numberOfSymbols, int &symbolsCounter, int &lineCounter, int &tagsCounter) {//This function looks through all symbols to find tags.
     if(numberOfSymbols == symbolsCounter){
         return;
     }
@@ -169,78 +166,35 @@ void firstPass(int &numberOfSymbols, int &symbolsCounter, int &lineCounter, int 
     else if(temp_symbol == "sub") symbolsCounter = symbolsCounter + 4;
     else if(temp_symbol == "subu") symbolsCounter = symbolsCounter + 4;
     else{
-            //If a label is found that isn't an instruction is probably is a label and is recorded.
-            Labels newLabel; //We create a new Labels object.
-            newLabel.name = temp_symbol; //We store the name of the label.
-            newLabel.address = lineCounter; //We store the lineCounter (address in decimal).
-            label.push_back(newLabel); //Then we push the object into a vector for storage.
-            //We do not increment lineCounter because a label is just a placeholder for the next instruction's address not it's own.
-            labelsCounter++; //We increment the labels counter keeping track of the size of our vector.
-            symbolsCounter++; //We increment symbolsCounter because the label is a symbol in our symbols vector.
+            //If a tag is found that isn't an instruction is probably is a tag and is recorded.
+            tags newtag; //We create a new tags object.
+            newtag.name = temp_symbol; //We store the name of the tag.
+            newtag.address = lineCounter; //We store the lineCounter (address in decimal).
+            tag.push_back(newtag); //Then we push the object into a vector for storage.
+            //We do not increment lineCounter because a tag is just a placeholder for the next instruction's address not it's own.
+            tagsCounter++; //We increment the tags counter keeping track of the size of our vector.
+            symbolsCounter++; //We increment symbolsCounter because the tag is a symbol in our symbols vector.
             lineCounter++;
             return;
     }
-    lineCounter++; //We increment the line counter once after each instruction is run through. Except for when a label is found!
+    lineCounter++;
 }
 
-/* Converts hex values to binary values (strings only) */
-string hex2bin(string hexString)
-{
-    stringstream temp;
-    temp << hex << hexString;
-    unsigned n;
-    temp >> n;
-    bitset<16> b(n);
-
-    return b.to_string();
-}
-
-/* Converts  binary values to hex values (strings only) */
-string bin2hex(string binString)
-{
-    string hexString;
-    bitset<32> b(binString);
-    unsigned n = b.to_ulong();
-    stringstream temp;
-    temp << hex << setfill('0') << setw(8) << n;
-    hexString = temp.str();
-    transform(hexString.begin(), hexString.end(), hexString.begin(), ::toupper);
-    return hexString;
-
-}
-
-/* Converts decimal values to hex values (Outputs a string) */
-string dec2bin(int value)
-{
-    stringstream ht;
-    ht << hex << value;
-
-    stringstream bt;
-    bt << hex << ht.str();
-    unsigned n;
-    bt >> n;
-    bitset<16> b(n);
-
-    return b.to_string();
-}
-
-
-/* This is the main print function that utilizes all the functions above it to print out the assembled instructions */
 void printFile(){
     int lineCounter = 0; //The line counter records the line address count.
     int numberOfSymbols = symbols.size(); //This is the number of symbols we parsed from the assembly file.
     int symbolCounter = 0; //Whenever we iterate through the symbols vector we want to keep count as to not overflow.
     string instruction; //This string holds the final instruction in HEX for printing.
-    int labelsCounter = 0; //We keep a count of the labels we find in the symbols vector.
+    int tagsCounter = 0; //We keep a count of the tags we find in the symbols vector.
 
-    for(int i = 0; i < numberOfSymbols; i++){ //1st pass through symbols list to see if there are any labels, to record their addresses.
-        firstPass(numberOfSymbols, symbolCounter, lineCounter, labelsCounter);
+    for(int i = 0; i < numberOfSymbols; i++){ //1st pass through symbols list to see if there are any tags, to record their addresses.
+        firstPass(numberOfSymbols, symbolCounter, lineCounter, tagsCounter);
     }
     cout << setw(23) <<  "SYMBOL TABLE" << endl;
-    cout << setw(15) << "LABEL" << setw(10) << "ADDRESS" << endl;
+    cout << setw(15) << "tag" << setw(10) << "ADDRESS" << endl;
 
-    for(int i=0; i<label.size()-1; i++){
-        cout << setw(15) << label[i].name << setw(10) << label[i].address +1<< endl;
+    for(int i=0; i<tag.size()-1; i++){
+        cout << setw(15) << tag[i].name << setw(10) << tag[i].address +1<< endl;
     }
 }
 
@@ -250,12 +204,7 @@ int main(int argc, char *argv[]){
         return 1;
     }
     openFile(argv[1]);
-    cout << "file open and parsed..." << endl;
     compareTokens();
-    cout << "Tokens Compared..." << endl;
-    // printSymbols();
-    // cout << "Symbols Printed..." << endl;
     printFile();
-    //cout << "Assembled file created..." << endl;
     return 0;
 }
