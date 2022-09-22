@@ -19,7 +19,7 @@ void openFile(char *filename){
     ifstream file;
     file.open(filename);
 
-    if(!file.is_open()){ //If the file does not exist the program crashes.
+    if(!file.is_open()){ 
         cout << "Failed to open the file." << endl;
         exit(EXIT_FAILURE);
     }
@@ -208,3 +208,15 @@ int main(int argc, char *argv[]){
     printFile();
     return 0;
 }
+
+/*
+
+Disclaimer: 
+References - 1) Learnt using setfill and setw 
+https://programmingdigest.com/c-manipulators-endl-setw-setfill-setprecision-with-examples/#The_setfill_C_Manipulators 
+
+2) Reference used for mips machine code
+https://web.engr.oregonstate.edu/~walkiner/cs271-wi13/slides/11-MachineCode.pdf 
+
+3) https://github.com/JamesHearts 
+*/
