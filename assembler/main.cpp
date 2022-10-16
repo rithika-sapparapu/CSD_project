@@ -274,7 +274,6 @@ string loadWordTable(int &numberOfSymbols, int &symbolCounter){
         bitset<16> b(n);
 
         bin = b.to_string();
-
         temp = bin;
 
 
@@ -517,7 +516,7 @@ string symbolPrint(int &addr, int &numberOfSymbols, int &symbolCounter, int &lab
 /* The firstPass function runs through the symbol list and records all labels and their addresses */
 void firstPass(int &numberOfSymbols, int &symbolsCounter, int &lineCounter, int &labelsCounter){ //This function looks through all symbols to find labels.
     if(numberOfSymbols == symbolsCounter){
-        return;
+        return; 
     }
     string temp_symbol = symbols[symbolsCounter];
 
@@ -645,17 +644,14 @@ void identifiers(char &value, int &i){
 }
 
 /* Checks for registers, knows if a register is being parsed a '$' symbol is encountered then records the number */
-void registers(char &value, int &i)
-{
+void registers(char &value, int &i){
     string temp;
     temp += value;
     i++;
     value = tokens[i];
 
-    while(isdigit(value))
-    {
-        if(i == tokenSize)
-        {
+    while(isdigit(value)){
+        if(i == tokenSize){
             break;
         }
 
