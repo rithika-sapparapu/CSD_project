@@ -626,4 +626,7 @@ https://programmingdigest.com/c-manipulators-endl-setw-setfill-setprecision-with
 https://web.engr.oregonstate.edu/~walkiner/cs271-wi13/slides/11-MachineCode.pdf 
 
 3) https://github.com/JamesHearts 
+
+4) https://eng.libretexts.org/Bookshelves/Computer_Science/Programming_Languages/Introduction_To_MIPS_Assembly_Language_Programming_(Kann)/07%3A_Assembly_Language_Program_Control_Structures/7.08%3A_How_to_Calculate_Branch_Amounts_in_Machine_Code - 
+reference for branch instructions
 */
