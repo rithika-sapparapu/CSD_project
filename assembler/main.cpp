@@ -488,12 +488,13 @@ void printFile(){ //This function prints to file.
     }
 
     //printing symbol table
+    /*
     cout << setw(23) <<  "SYMBOL TABLE" << endl;
     cout << setw(15) << "label" << setw(10) << "ADDRESS" << endl;
 
     for(int i=0; i<label.size()-1; i++){
         cout << setw(15) << label[i].name << setw(10) << label[i].address << endl;
-    }
+    }*/
 
     symbolCounter = 0; //Reset symbolCounter and lineCounter to be used in the second pass.
     lineCounter = 0;
@@ -506,7 +507,8 @@ void printFile(){ //This function prints to file.
         }
 
         oFile << "   ";
-        oFile << setw(3) << setfill('0') << hex << lineCounter << ":   ";
+        int bytenumber = lineCounter*4;
+        oFile << setw(3) << setfill('0') << hex << bytenumber << ":   ";
         instruction = symbolPrint(i,numberOfSymbols, symbolCounter, labelsCounter, lineCounter);
         oFile << instruction << endl;
     }
@@ -608,7 +610,7 @@ int main(int argc, char *argv[]){
     // cout << "Symbols Printed..." << endl;
     printFile();
     
-    cout << "Assembled file created..." << endl;
+    // cout << "Assembled file created..." << endl;
     return 0;
 }
 
