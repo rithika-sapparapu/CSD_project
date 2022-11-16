@@ -21,3 +21,14 @@ vector<char> dataTokens;
 vector<char> textTokens; 
 vector<char> tokens; //Vector of tokens taken from the original file.
 vector<string> symbols; //Vectr of symbols.
+vector<string> data_symbols;
+
+//struct used for lebels in .data section
+struct data_label{
+  string name;
+  string type;
+  vector <string> values;
+  int offsetBytes_forLbales;
+};
+
+vector<data_label> dataLabels;

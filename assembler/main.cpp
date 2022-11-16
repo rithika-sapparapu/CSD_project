@@ -660,12 +660,63 @@ void compareTokens(){ //This function turns all tokens into symbols.
 }
 
 void runDataSegment(){
+    //data_symols contains all the .data segment related symbols
+    string temp = "";
     for(int i = 0; i < tokenSize_data; i++){
         token = dataTokens[i];
-        // cout << token << "-";
-        
+        if(token!=':' && !isspace(token) && token!=',' && token!='.'){
+            temp = temp + token;
+        }
+        else{
+            if(isalpha(temp[0]) || isdigit(temp[0])){
+                data_symbols.push_back(temp);
+                temp = "";
+            }
+        }
 
     }
+    // for(int i = 0; i < data_symbols.size(); i++){
+    //     cout << data_symbols[i] << " ";
+    // }
+    // cout << endl;
+    
+    int t = 0;
+    while(t < data_symbols.size()-1){
+        struct data_label tem;
+        tem.name = data_symbols[t];
+        t++;
+        tem.type = data_symbols[t];
+        t++;
+        if(tem.type=="word"){
+            while(!isalpha(data_symbols[t][0])){
+                tem.values.push_back(data_symbols[t]);
+                
+                if(t >= data_symbols.size()-1){
+                    break;
+                }
+                t++;
+            }
+            dataLabels.push_back(tem);
+        }
+        if(tem.type=="asciiz"){
+            //code for .asciiz
+        }
+    }
+
+    int offset = 0;
+    for(int i = 0; i < dataLabels.size(); i++){
+        dataLabels[i].offsetBytes_forLbales = offset;
+        offset += dataLabels[i].values.size() * 4;
+    }
+
+    // for(int i = 0; i < dataLabels.size(); i++){
+    //     // cout << data_symbols[i] << " ";
+    //     cout << dataLabels[i].name << " " << dataLabels[i].type << " " << dataLabels[i].offsetBytes_forLbales << " ";
+    //     for(int j=0; j< dataLabels[i].values.size(); j++){
+    //         cout << dataLabels[i].values[j] << " ";
+    //     }
+    //     cout << endl;
+    // }
 }
 
 int main(int argc, char *argv[]){
@@ -679,7 +730,6 @@ int main(int argc, char *argv[]){
     openDataFile();
     runDataSegment();
     printFile();
-    
     // cout << "Assembled file created..." << endl;
     return 0;
 }
