@@ -466,6 +466,9 @@ string symbolPrint(int &addr, int &numberOfSymbols, int &symbolCounter, int &lab
             Sft = shiftTable(numberOfSymbols, symbolCounter);
             temp = temp + Tmp + Dst + Sft + "000000";
         }
+        else if(temp_symbol == "la"){
+            temp = ""
+        }
         else{
             //If a label is encountered we ignore it since we have previously recorded it.
             //However we increment the symbolCounter and we call the symbolPrint function to print the next line in it's place.
@@ -673,7 +676,6 @@ void runDataSegment(){
                 temp = "";
             }
         }
-
     }
     // for(int i = 0; i < data_symbols.size(); i++){
     //     cout << data_symbols[i] << " ";
