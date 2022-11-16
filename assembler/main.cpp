@@ -4,7 +4,7 @@
 using namespace std;
 
 /* Opens the file and reads it, creates a table of tokens (no spaces) */
-void openFile(char *filename){
+void splitFile(char *filename){
     ifstream file;
     file.open(filename);
 
@@ -22,15 +22,75 @@ void openFile(char *filename){
             tokens.push_back(temp);
 
             i++;
+            tSize++;
+        }
+        i = 0;
+        tSize--;
+
+        ofstream dataFile;
+        dataFile.open("tempFiles/dataFile.txt");
+        for(i = 6; i < tSize; i++){
+            if(tokens[i]=='.' && tokens[i+1]=='t' && tokens[i+2] == 'e' && tokens[i+3] == 'x' && tokens[i+4] == 't')//cant have less than one instruction
+                break;
+            dataFile << tokens[i] << "";
+        }
+
+        ofstream textFile;
+        textFile.open("tempFiles/textFile.txt");
+        i=i+24;
+        for(; i < tSize; i++){
+            textFile << tokens[i] << "";
+        }
+    }
+}
+
+void openTextFile(){
+    ifstream file;
+    file.open("tempFiles/textFile.txt");
+
+    if(!file.is_open()){ //If the file does not exist the program crashes.
+        cout << "Failed to open the file!" << endl;
+        exit(EXIT_FAILURE);
+    }
+
+    else{
+        int i = 0;
+        char temp;
+
+        while (!file.eof()){
+            file.get(temp);
+            textTokens.push_back(temp);
+
+            i++;
             tokenSize++;
         }
         i = 0;
         tokenSize--;
+    }
+}
 
-        // for(int i = 0; i < tokenSize; i++){
-        //     cout << tokens[i] << "" ;
-        // }
-        // cout << endl;
+void openDataFile(){
+    ifstream file;
+    file.open("tempFiles/dataFile.txt");
+
+    if(!file.is_open()){ //If the file does not exist the program crashes.
+        cout << "Failed to open the file!" << endl;
+        exit(EXIT_FAILURE);
+    }
+
+    else{
+        int i = 0;
+        char temp;
+
+        while (!file.eof()){
+            file.get(temp);
+            dataTokens.push_back(temp);
+
+            i++;
+            tokenSize_data++;
+        }
+        i = 0;
+        tokenSize_data--;
     }
 }
 
@@ -210,15 +270,18 @@ string loadWordTable(int &numberOfSymbols, int &symbolCounter){
     temp_symbol = symbols[symbolCounter]; //Store the offset amount symbol in a temporary symbol variable.
 
     signed decimal = atoi(temp_symbol.c_str());
+        // cout << endl << "decimal " << decimal << endl; 
 
         stringstream ht;    //After finding it we increment the address and turn it into binary form.
         ht << hex << decimal;
-
+        // cout << "ht " << ht << endl; 
         stringstream bt;
         bt << hex << ht.str();
+        // cout << "bt " << bt << endl; 
         signed n;
         bt >> n;
         bitset<16> b(n);
+        // cout << "b(n) " << b(n) << endl; 
 
         bin = b.to_string();
         temp = bin;
@@ -418,7 +481,6 @@ string symbolPrint(int &addr, int &numberOfSymbols, int &symbolCounter, int &lab
     return temp;
 }
 
-
 /* The firstPass function runs through the symbol list and records all labels and their addresses */
 void firstPass(int &numberOfSymbols, int &symbolsCounter, int &lineCounter, int &labelsCounter){ //This function looks through all symbols to find labels.
     if(numberOfSymbols == symbolsCounter){
@@ -470,12 +532,19 @@ void firstPass(int &numberOfSymbols, int &symbolsCounter, int &lineCounter, int 
     lineCounter++; //We increment the line counter once after each instruction is run through. Except for when a label is found!
 }
 
-
-
 /* This is the main print function that utilizes all the functions above it to print out the assembled instructions */
 void printFile(){ //This function prints to file.
     ofstream oFile;
     oFile.open("objectfile.txt");
+
+
+
+
+    //manipulate the .data section:
+    
+
+
+
 
     int lineCounter = 0; //The line counter records the line address count.
     int numberOfSymbols = symbols.size(); //This is the number of symbols we parsed from the assembly file.
@@ -488,13 +557,13 @@ void printFile(){ //This function prints to file.
     }
 
     //printing symbol table
-    /*
+    
     cout << setw(23) <<  "SYMBOL TABLE" << endl;
     cout << setw(15) << "label" << setw(10) << "ADDRESS" << endl;
 
     for(int i=0; i<label.size()-1; i++){
         cout << setw(15) << label[i].name << setw(10) << label[i].address << endl;
-    }*/
+    }
 
     symbolCounter = 0; //Reset symbolCounter and lineCounter to be used in the second pass.
     lineCounter = 0;
@@ -517,13 +586,6 @@ void printFile(){ //This function prints to file.
 
 }
 
-/* This is a function used for tests only use if you need to see the way the symbols were parsed */
-void printSymbols(){
-    for(int i = 0; i < symbols.size(); i++){
-        cout << symbols[i] << endl;
-    }
-}
-
 /* Checks for identifiers (lowercase symbols, ex: addi, lw, etc.) */
 void identifiers(char &value, int &i){
     string temp;
@@ -533,7 +595,7 @@ void identifiers(char &value, int &i){
         }
         temp += value;
         i++;
-        value = tokens[i];
+        value = textTokens[i];
     }
     symbols.push_back(temp);
 }
@@ -543,7 +605,7 @@ void registers(char &value, int &i){
     string temp;
     temp += value;
     i++;
-    value = tokens[i];
+    value = textTokens[i];
 
     while(isdigit(value)){
         if(i == tokenSize){
@@ -552,7 +614,7 @@ void registers(char &value, int &i){
 
         temp += value;
         i++;
-        value = tokens[i];
+        value = textTokens[i];
     }
 
     symbols.push_back(temp);
@@ -561,21 +623,21 @@ void registers(char &value, int &i){
 /* Checks for digits, digits are usually addressees or offsets, it disguishes between the two and records appropriate symbols */
 void digits(char &value, int &i){
     string temp;
-    if(value == '0' && tokens[i+1] == 'x'){
+    if(value == '0' && textTokens[i+1] == 'x'){
         i = i + 2;
     }
     if(value == '-'){
         temp = value;
         i = i + 1;
     }
-    value = tokens[i];
+    value = textTokens[i];
     while(isdigit(value) || islower(value)){
         if(i == tokenSize){
             break;
         }
         temp += value;
         i++;
-        value = tokens[i];
+        value = textTokens[i];
     }
     symbols.push_back(temp);
 }
@@ -583,7 +645,7 @@ void digits(char &value, int &i){
 /* This function generates the symbol vector using the functions above it to distinguish between symbols */
 void compareTokens(){ //This function turns all tokens into symbols.
     for(int i = 0; i < tokenSize; i++){
-            token = tokens[i];
+            token = textTokens[i];
 
             if(islower(token)){
                 identifiers(token, i);
@@ -594,20 +656,28 @@ void compareTokens(){ //This function turns all tokens into symbols.
             if(isdigit(token) || token == '-'){
                 digits(token, i);
             }
-
     }
 }
 
+void runDataSegment(){
+    for(int i = 0; i < tokenSize_data; i++){
+        token = dataTokens[i];
+        // cout << token << "-";
+        
+
+    }
+}
 
 int main(int argc, char *argv[]){
     if(argc < 2) {
         cout << "Usage: " << argv[0] << " <filename>" << endl;
         return 1;
     }
-    openFile(argv[1]); //stores all characters in a vector called "tokens"
+    splitFile(argv[1]); //stores all characters in a vector called "tokens"
+    openTextFile();
     compareTokens(); //pushes into "symbols" vector all the symbols
-    // printSymbols();
-    // cout << "Symbols Printed..." << endl;
+    openDataFile();
+    runDataSegment();
     printFile();
     
     // cout << "Assembled file created..." << endl;
@@ -615,7 +685,6 @@ int main(int argc, char *argv[]){
 }
 
 /*
-
 Disclaimer: 
 References - 1) Learnt using setfill and setw 
 https://programmingdigest.com/c-manipulators-endl-setw-setfill-setprecision-with-examples/#The_setfill_C_Manipulators 
