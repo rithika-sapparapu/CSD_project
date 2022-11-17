@@ -1,3 +1,4 @@
+main:
 lui $1, 0xffff
 lui $5, 0x1e0f
 addi $6, $0, 0x0001
@@ -55,3 +56,5 @@ beq $4, $5, back
 jr $30
 back:
 jr $31
+addi $1, $0, 0x0004
+lw  $2, 0($1)

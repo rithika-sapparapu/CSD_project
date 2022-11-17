@@ -467,7 +467,7 @@ string symbolPrint(int &addr, int &numberOfSymbols, int &symbolCounter, int &lab
             temp = temp + Tmp + Dst + Sft + "000000";
         }
         else if(temp_symbol == "la"){
-            temp = ""
+            temp = "";
         }
         else{
             //If a label is encountered we ignore it since we have previously recorded it.
@@ -580,7 +580,7 @@ void printFile(){ //This function prints to file.
 
         oFile << "   ";
         int bytenumber = lineCounter*4;
-        oFile << setw(3) << setfill('0') << hex << bytenumber << ":   ";
+        // oFile << setw(3) << setfill('0') << hex << bytenumber << ":   ";
         instruction = symbolPrint(i,numberOfSymbols, symbolCounter, labelsCounter, lineCounter);
         oFile << instruction << endl;
     }
@@ -729,8 +729,8 @@ int main(int argc, char *argv[]){
     splitFile(argv[1]); //stores all characters in a vector called "tokens"
     openTextFile();
     compareTokens(); //pushes into "symbols" vector all the symbols
-    openDataFile();
-    runDataSegment();
+    // openDataFile();
+    // runDataSegment();
     printFile();
     // cout << "Assembled file created..." << endl;
     return 0;
